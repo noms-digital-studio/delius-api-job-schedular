@@ -1,0 +1,11 @@
+{
+  "name": "delius-api-request-proxy",
+  "version": "0.0.1",
+  "description": "A forward proxy that queues requests ready for the poll pusher to process",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Ministry of Justice",
+  "license": "MIT"
+}
