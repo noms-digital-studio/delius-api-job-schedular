@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:8-jdk-browsers
+      - image: circleci/node:6
     steps:
       - run:
           name: Generate Build version
@@ -13,6 +13,21 @@ jobs:
       - checkout
 
       - setup_remote_docker
+
+      - deploy:
+          name: Build Derived Git Commit
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              GIT_REF=$CIRCLE_SHA1 BUILD_NUMBER=$CIRCLE_BUILD_NUM \
+                npm run record-build-info
+              git add --force --verbose build-info.json
+              git config user.name "Circle CI"
+              git config user.email "circle@circleci.com"
+              git commit \
+                -m "Deployment of build $CIRCLE_BUILD_NUM" \
+                -m "$(git log --format=%B -n 1 $CIRCLE_SHA1)" \
+                -m "From gitref $CIRCLE_SHA1"
+            fi
 
       - deploy:
           name: Push to Docker Hub
