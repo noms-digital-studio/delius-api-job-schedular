@@ -40,12 +40,12 @@ jobs:
           name: Install elastic beanstalk CLI
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ./scripts/installElasticbeanstalk.sh
+              ./scripts/installElasticBeanstalk.sh
             fi
 
       - deploy:
           name: Deploy to Elastic Beanstalk Staging
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ./scripts/deployElasticbeanstalk.sh delius-api-job-schedular "${BUILD_VERSION}"
+              ./scripts/deployElasticBeanstalk.sh delius-api-job-schedular "${BUILD_VERSION}"
             fi
