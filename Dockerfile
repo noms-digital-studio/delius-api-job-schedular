@@ -12,7 +12,6 @@ RUN mkdir -p /opt/app && cp -a /tmp/node_modules /opt/app/
 WORKDIR /opt/app
 ADD ./ /opt/app
 
-ENV PORT 80
-EXPOSE 80
+EXPOSE 3000
 
 CMD ["npm", "start"]
