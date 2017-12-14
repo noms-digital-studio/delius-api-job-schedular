@@ -1,0 +1,12 @@
+.circleci
+.elasticbeanstalk
+.git
+bin
+dredd
+node_modules
+test
+.eslintrc
+.gitignore
+.snyk
+LICENSE
+README.md
