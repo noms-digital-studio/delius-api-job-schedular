@@ -1,22 +1,73 @@
 const express = require('express');
 const router = express.Router();
+
 const helpers = require('../helpers');
+const uuid = require('uuid/v4');
 
-// private
+const Queue = require('../helpers/queue');
 
-const renderIndex = (res) => (model) => helpers.raw(res, model);
+const retrieveNextJobRequest = (req, res, next) =>
+  (new Promise((resolve /*, reject*/) => {
+    let data = req.app.locals.queue.nextRequest();
 
-const createIndexViewModel = (/* req */) => (/*data*/) => ({});
+    req.log.info('next Job Requested');
+    req.log.debug(data);
 
-const displayIndex = (req, res, next) =>
-  (new Promise((res /*, rej*/) => { res({}); }))
-    .then(createIndexViewModel(req))
-    .then(renderIndex(res))
+    resolve(data);
+  }))
+    .then((data) => res.status(200).json(data))
+    .catch(helpers.failWithError(res, next));
+
+const processNewJobResponse = (req, res, next) =>
+  (new Promise((resolve /*, reject*/) => {
+    let data = {
+      reqId: req.params.reqId,
+      status: req.body.status,
+      body: req.body.body,
+      headers: req.body.headers
+    };
+
+    req.log.info('new Job Response Received');
+    req.log.debug(data);
+
+    req.app.locals.queue.processResponse(data.reqId, data);
+    resolve(data);
+  }))
+    .then((data) => res.status(202).json(data))
+    .catch(helpers.failWithError(res, next));
+
+const processNewRequest = (req, res, next) =>
+  (new Promise((resolve /*, reject*/) => {
+    let data = {
+      reqId: uuid(),
+      url: req.originalUrl,
+      method: req.method,
+      body: req.body,
+      headers: req.headers
+    };
+
+    req.log.info('new Request Made');
+    req.log.debug(data);
+
+    req.app.locals.queue
+      .addRequest(data.reqId, data)
+      .addHandler(data.reqId, (data) => resolve(data));
+  }))
+    .then((data) => res.status(data.status).set(data.headers).send(data.body))
     .catch(helpers.failWithError(res, next));
 
 // public
 
-router.get('/', displayIndex);
+router.use((req, res, next) => {
+  req.app.locals.queue = req.app.locals.queue || new Queue(req.app.locals.config.queue, req.log);
+  next();
+});
+
+router.get('/job', retrieveNextJobRequest);
+router.post('/job/:reqId', processNewJobResponse);
+
+// this route must be last to handle all other requests
+router.all('/*', processNewRequest);
 
 // exports
 

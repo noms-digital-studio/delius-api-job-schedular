@@ -2,10 +2,35 @@
   "name": "delius-api-request-proxy",
   "version": "0.0.1",
   "description": "A forward proxy that queues requests ready for the poll pusher to process",
+  "private": true,
+  "author": "Ministry of Justice",
+  "license": "MIT",
+  "engines": {
+    "npm": "~3.10.10",
+    "node": "~6.11.5"
+  },
   "main": "server.js",
   "scripts": {
-    "test": "mocha"
+    "start": "node server.js | bunyan -o short",
+    "build": "webpack",
+    "test": "mocha",
+    "test-report": "mocha --reporter mocha-junit-reporter",
+    "record-build-info": "node ./bin/record-build-info",
+    "wait-for-deploy": "node ./bin/wait-for-deploy",
+    "snyk": "snyk test"
   },
-  "author": "Ministry of Justice",
-  "license": "MIT"
+  "dependencies": {
+    "bunyan": "^1.8.12",
+    "bunyan-middleware": "^0.8.0",
+    "chai": "^4.1.2",
+    "dotenv": "^4.0.0",
+    "express": "^4.16.2",
+    "helmet": "^3.9.0",
+    "mocha": "^4.0.1",
+    "postal": "^2.0.5",
+    "require-all": "^2.2.0",
+    "supertest": "^3.0.0",
+    "uuid": "^3.1.0",
+    "x-frame-options": "^1.0.0"
+  }
 }
