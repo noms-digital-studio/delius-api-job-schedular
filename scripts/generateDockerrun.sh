@@ -9,7 +9,7 @@ cat <<- _EOF_ > Dockerrun.aws.json
 {
   "AWSEBDockerrunVersion": "1",
   "Image": {
-    "Name": "mojdigitalstudio/deliusapi:${BUILD_VERSION}",
+    "Name": "mojdigitalstudio/${APPLICATION_NAME}:${BUILD_VERSION}",
     "Update": "true"
   },
   "Ports": [
