@@ -24,37 +24,47 @@ describe('/job', () => {
   });
 
   it('can fulfil GET requests', (done) => {
-    request(server)
-      .get('/hello')
-      .accept('json')
-      .expect(200)
+    request(server).get('/hello').accept('json').expect(200)
       .then((response) => {
         should.exist(response);
-        console.log('completed request', response.body);
         done();
       })
       .catch((err) => { done(err); });
 
-    request(server)
-      .get('/job')
-      .accept('json')
-      .expect(200)
+    request(server).get('/job').accept('json').expect(200)
       .then((job) => {
         should.exist(job);
-        console.log('got job', job.body);
 
         return request(server)
-          .post(`/job/${job.body.reqId}`)
-          .accept('json')
-          .send({ hello: 'world' })
+          .post(`/job/${job.body.reqId}`).accept('json')
+          .send({
+            status: 200,
+            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            body: { hello: 'world' }
+          })
           .expect(202);
       })
       .catch((err) => { done(err); })
-      .then((accepted) => {
-        should.exist(accepted);
-        console.log('completed job', accepted.body);
+      .then((accepted) => should.exist(accepted));
+  });
+
+  it.skip('returns 204 when no job available', (done) => {
+    request(server).get('/hello').accept('json').expect(200)
+      .then(() => {})
+      .catch((err) => { done(err); });
+
+    request(server).get('/job').accept('json').expect(200)
+      .then(() => request(server).get('/job').accept('json').expect(204))
+      .then((response) => {
+        should.exist(response);
+        done();
       })
       .catch((err) => { done(err); });
   });
+
+  it('returns 400 when an unrecognised job is passed', () =>
+    request(server)
+      .post(`/job/ardvark`).accept('json').send({ status: 200 }).expect(400)
+      .then((response) => should.not.exist(response.data)));
 
 });

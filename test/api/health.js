@@ -48,8 +48,6 @@ describe('API Health', () => {
           res.body.should.have.property('healthy', true);
           res.body.should.have.property('status', 'UP');
           res.body.should.have.property('checks');
-          res.body.checks.should.have.property('nomis-api');
-          res.body.checks.should.have.property('elite2-api');
         })
         .catch((err) => console.log(err)));
   });

@@ -6,7 +6,7 @@ const request = require('supertest');
 const app = require('../../server/app');
 const log = require('../../server/log');
 
-describe('API Security', () => {
+describe.skip('API Security', () => {
   let server;
   let paths = [ 'get', 'post', 'put', 'delete' ];
 

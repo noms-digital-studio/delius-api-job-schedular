@@ -35,7 +35,7 @@ describe('Queue', () => {
       req.should.have.property('data');
       req.data.should.eq(request);
 
-      this.queue.processResponse(req.reqId, { body: { hello: 'world' } });
+      this.queue.processResponse(req.reqId)({ body: { hello: 'world' } });
   });
 
   it('only returns requests that have been made', (done) => {
@@ -61,7 +61,17 @@ describe('Queue', () => {
       should.exist(req);
       should.not.exist(req2);
 
-      this.queue.processResponse(req.reqId, { body: { hello: 'world' } });
+      this.queue.processResponse(req.reqId)({ body: { hello: 'world' } });
+  });
+
+  it('returns requests in the order they arrived', () => {
+      this.queue.addRequest(1, { id: 1 });
+      this.queue.addRequest(2, { id: 2 });
+      this.queue.addRequest(3, { id: 3 });
+
+      this.queue.nextRequest().should.have.property('reqId', 1);
+      this.queue.nextRequest().should.have.property('reqId', 2);
+      this.queue.nextRequest().should.have.property('reqId', 3);
   });
 
 });

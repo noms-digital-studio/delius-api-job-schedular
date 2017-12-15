@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const helpers = require('../helpers');
+const errors = require('../../server/errors');
 const uuid = require('uuid/v4');
 
 const Queue = require('../helpers/queue');
@@ -15,13 +16,14 @@ const retrieveNextJobRequest = (req, res, next) =>
 
     resolve(data);
   }))
-    .then((data) => res.status(200).json(data))
+    .then((data) => data ? res.status(200).json(data) : res.status(204).json())
     .catch(helpers.failWithError(res, next));
 
 const processNewJobResponse = (req, res, next) =>
-  (new Promise((resolve /*, reject*/) => {
+  (new Promise((resolve, reject) => {
+    let reqId = req.params.reqId;
     let data = {
-      reqId: req.params.reqId,
+      reqId: reqId,
       status: req.body.status,
       body: req.body.body,
       headers: req.body.headers
@@ -30,8 +32,15 @@ const processNewJobResponse = (req, res, next) =>
     req.log.info('new Job Response Received');
     req.log.debug(data);
 
-    req.app.locals.queue.processResponse(data.reqId, data);
-    resolve(data);
+    let handler = req.app.locals.queue.processResponse(data.reqId);
+
+    if (!handler) {
+      errors.validation(res, `The request identifier '${reqId}' was not recognised`);
+
+      return;
+    }
+
+    resolve(handler(data));
   }))
     .then((data) => res.status(202).json(data))
     .catch(helpers.failWithError(res, next));

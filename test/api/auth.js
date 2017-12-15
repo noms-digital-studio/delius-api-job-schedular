@@ -3,7 +3,7 @@ const request = require('supertest');
 const app = require('../../server/app');
 const log = require('../../server/log');
 
-describe('API Key authentication', () => {
+describe.skip('API Key authentication', () => {
   const auth = {
     keys: [ '2be60db6-68ad-4b57-aa99-457e6bbdf6c8' ],
     host: 'successful.example.com',

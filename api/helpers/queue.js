@@ -22,7 +22,7 @@ Queue.prototype.addHandler = function(reqId, handler) {
 };
 
 Queue.prototype.nextRequest = function() {
-  let reqId = this.queue.pop();
+  let reqId = this.queue.shift();
 
   if (!reqId) return;
 
@@ -33,13 +33,13 @@ Queue.prototype.nextRequest = function() {
   return {reqId, data};
 };
 
-Queue.prototype.processResponse = function(reqId, data) {
+Queue.prototype.processResponse = function(reqId) {
+  if (!reqId) return;
+
   let handler = this.handlers[reqId];
   delete this.handlers[reqId];
 
-  handler(data);
-
-  return this;
+  return handler;
 };
 
 module.exports = Queue;

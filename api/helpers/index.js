@@ -49,7 +49,7 @@ const failWithError = (res, next) => (err) => {
     ex.stack = err.stack;
   }
 
-  res.status(400) && next(ex);
+  res.status(err.status || 400) && next(ex);
 };
 
 const rpcError = (url, opts, err) => {
