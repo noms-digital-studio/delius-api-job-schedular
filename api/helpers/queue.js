@@ -2,6 +2,7 @@ function Queue(config) {
   this.queue = [];
   this.handlers = {};
   this.requests = {};
+  this.timeouts = {};
 
   this.config = Object.assign({
     timeout: 10000 // 10 secs
@@ -11,6 +12,17 @@ function Queue(config) {
 Queue.prototype.addRequest = function(reqId, data) {
   this.requests[reqId] = data;
   this.queue.push(reqId);
+
+  this.timeouts[reqId] = setTimeout(() => {
+    let index = this.queue.indexOf(reqId);
+    if (~index) {
+      this.queue.splice(index, 1);
+    }
+
+    delete this.handlers[reqId];
+    delete this.requests[reqId];
+    delete this.timeouts[reqId];
+  }, this.config.timeout);
 
   return this;
 };
@@ -27,8 +39,10 @@ Queue.prototype.nextRequest = function() {
   if (!reqId) return;
 
   let data = this.requests[reqId];
+  clearTimeout(this.timeouts[reqId]);
 
   delete this.requests[reqId];
+  delete this.timeouts[reqId];
 
   return Object.assign({}, {reqId}, data);
 };
