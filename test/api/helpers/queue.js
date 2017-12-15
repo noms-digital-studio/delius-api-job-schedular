@@ -32,8 +32,10 @@ describe('Queue', () => {
       let req = this.queue.nextRequest();
       should.exist(req);
       req.should.have.property('reqId', reqId);
-      req.should.have.property('data');
-      req.data.should.eq(request);
+      req.should.have.property('path', '/hello');
+      req.should.have.property('method', 'GET');
+      req.should.have.property('headers');
+      req.headers.should.eq(request.headers);
 
       this.queue.processResponse(req.reqId)({ body: { hello: 'world' } });
   });

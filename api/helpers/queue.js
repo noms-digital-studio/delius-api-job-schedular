@@ -30,7 +30,7 @@ Queue.prototype.nextRequest = function() {
 
   delete this.requests[reqId];
 
-  return {reqId, data};
+  return Object.assign({}, {reqId}, data);
 };
 
 Queue.prototype.processResponse = function(reqId) {
