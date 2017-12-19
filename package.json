@@ -1,6 +1,6 @@
 {
   "name": "delius-api-request-proxy",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A forward proxy that queues requests ready for the poll pusher to process",
   "private": true,
   "author": "Ministry of Justice",

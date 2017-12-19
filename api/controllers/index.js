@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router();
+const router = new express.Router();
 
 const helpers = require('../helpers');
 const errors = require('../../server/errors');
@@ -20,7 +20,7 @@ const retrieveNextJobRequest = (req, res, next) =>
     .catch(helpers.failWithError(res, next));
 
 const processNewJobResponse = (req, res, next) =>
-  (new Promise((resolve, reject) => {
+  (new Promise((resolve/*, reject*/) => {
     let reqId = req.params.reqId;
     let data = {
       reqId: reqId,

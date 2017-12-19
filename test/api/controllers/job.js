@@ -1,8 +1,5 @@
 const should = require('chai').should();
 
-const express = require('express');
-const router = express.Router();
-
 const request = require('supertest');
 
 const app = require('../../../server/app');
