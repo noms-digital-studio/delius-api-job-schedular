@@ -51,7 +51,7 @@ const processNewRequest = (req, res, next) =>
       reqId: uuid(),
       url: req.originalUrl,
       method: req.method,
-      body: req.body.toString(),
+      body: req.body.toString('base64'),
       headers: req.headers
     };
 
