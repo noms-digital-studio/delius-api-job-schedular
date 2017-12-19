@@ -1,11 +1,8 @@
 const express = require('express');
 const bunyanMiddleware = require('bunyan-middleware');
-const helmet = require('helmet');
 const bodyParser = require('body-parser');
-const xFrameOptions = require('x-frame-options');
 const requireAll = require('require-all');
 
-const auth = require('./apiKeyAuth');
 const errors = require('./errors');
 const healthcheck = require('../api/health/healthcheck');
 
@@ -32,58 +29,35 @@ const flatten = (data) => {
   return result;
 };
 
-module.exports = (config, log, callback, includeErrorHandling = true) => {
+module.exports = (config, logger, callback, includeErrorHandling = true) => {
   const app = express();
   app.locals.config = config;
 
-  app.set('json spaces', 2);
-  app.set('trust proxy', true);
+  app.use(bunyanMiddleware({ logger: logger }));
+  app.use('/job/*', bodyParser.json());
+  app.use('/*', bodyParser.raw({ inflate: false, limit: '1024kb', type: '*/*' }));
 
-  setupBaseMiddleware(app, log);
-  setupOperationalRoutes(app);
-  setupAuthMiddleware(app, log);
-  setupRouters(app, log);
+  setupHealthRoute(app);
+  setupRouters(app, logger);
 
   if (includeErrorHandling) {
     setupErrorHandling(app, config);
   }
 
-  healthcheck(config, log)
+  healthcheck(config, logger)
     .then((result) => {
       if (!result.healthy) {
-        return log.error(result);
+        return logger.error(result);
       }
 
-      log.info(result);
-    });
+      logger.info(result);
+    })
+    .catch((err) => logger.error(err));
 
   return callback(null, app);
 };
 
-function setupBaseMiddleware(app, log) {
-  app.use(bunyanMiddleware({
-    logger: log,
-    obscureHeaders: ['Authorization'],
-  }));
-
-  app.use(function detectAzureSSL(req, res, next) {
-    if (!req.get('x-forwarded-proto') && req.get('x-arr-ssl')) {
-      req.headers['x-forwarded-proto'] = 'https';
-    }
-
-    return next();
-  });
-
-  app.use(helmet());
-  app.use(helmet.noCache());
-  app.use(helmet.referrerPolicy({ policy: 'same-origin' }));
-
-  app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(bodyParser.json());
-  app.use(xFrameOptions());
-}
-
-function setupOperationalRoutes(app) {
+function setupHealthRoute(app) {
   app.get('/health', (req, res) =>
     healthcheck(app.locals.config, req.log)
       .then((result) => {
@@ -94,11 +68,6 @@ function setupOperationalRoutes(app) {
         res.json(result);
       })
       .catch((err) => errors.unexpected(res, err.message)));
-}
-
-function setupAuthMiddleware(app, log) {
-  const authMiddleware = auth(app.locals.config.auth, log);
-  if (authMiddleware) app.use(authMiddleware);
 }
 
 function setupRouters(app, log) {
