@@ -35,7 +35,7 @@ module.exports = (config, logger, callback, includeErrorHandling = true) => {
 
   app.use(bunyanMiddleware({ logger: logger }));
   app.use('/job/*', bodyParser.json());
-  app.use('/*', bodyParser.raw({ inflate: false, limit: '1024kb', type: '*/*' }));
+  app.use('/*', bodyParser.raw({ inflate: false, limit: '2048kb', type: '*/*' }));
 
   setupHealthRoute(app);
   setupRouters(app, logger);
