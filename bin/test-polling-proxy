@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+
+const request = require('superagent');
+
+const jobRoot = 'http://delius-api-job-schedular-dev.tqek38d8jq.eu-west-2.elasticbeanstalk.com';
+const proxyRoot = 'http://localhost:3000';
+
+function createRequest(job) {
+  return request[job.method.toLowerCase()](`${proxyRoot}${job.url}`)
+    .headers(job.headers)
+    .send(job.body);
+}
+
+function getNextJob() {
+  request
+    .get(`${jobRoot}/job`)
+    .catch((err) => console.error(err))
+    .then((response) => createRequest(response.body))
+    .then(processResponse);
+}
+
+setInterval(getNextJob, 1000);

@@ -51,9 +51,12 @@ const processNewRequest = (req, res, next) =>
       reqId: uuid(),
       url: req.originalUrl,
       method: req.method,
-      body: req.body.toString('base64'),
       headers: req.headers
     };
+
+    if (Buffer.isBuffer(req.body)) {
+      data.body = req.body.toString('base64');
+    }
 
     req.log.info('new Request Made');
     req.log.debug(data);
